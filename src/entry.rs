@@ -58,7 +58,7 @@ impl RootKey {
         let obj_begin = begin + key_len as u64;
         let meta_begin = reader.seek(SeekFrom::Current(0))?;
         let mut meta_data = vec![0; (obj_begin - meta_begin) as usize];
-        reader.read(&mut meta_data)?;
+        reader.read_exact(&mut meta_data)?;
 
         // TODO
         // parse compression header according to https://github.com/root-project/root/blob/master/js/scripts/JSRoot.io.js#L189
@@ -90,7 +90,7 @@ impl RootKey {
     ) -> Result<Vec<u8>, RootIoError> {
         reader.seek(SeekFrom::Start(self.obj_begin))?;
         let mut buf = vec![0; self.obj_len as usize];
-        reader.read(&mut buf)?;
+        reader.read_exact(&mut buf)?;
         Ok(buf)
     }
 
@@ -104,7 +104,7 @@ impl RootKey {
             return Ok(StreamKind::Uncompressed);
         }
         let mut header = [0; HEADER_SIZE];
-        reader.read(&mut header)?;
+        reader.read_exact(&mut header)?;
 
         match &header[..2] {
             b"ZL" => {

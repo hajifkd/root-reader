@@ -28,7 +28,7 @@ pub(crate) fn read_as_u64(cond: bool, reader: &mut impl Read) -> Result<u64, Roo
 pub(crate) fn read_string(reader: &mut impl Read) -> Result<String, RootIoError> {
     let len = reader.read_u8()?;
     let mut vec = vec![0u8; len as usize];
-    reader.read(&mut vec)?;
+    reader.read_exact(&mut vec)?;
     Ok(String::from_utf8_lossy(&vec).to_string())
 }
 
@@ -86,7 +86,7 @@ impl<T: Read + Seek> RootFile<T> {
         let mut reader = reader;
         let mut header = [0u8; 4];
 
-        reader.read(&mut header)?;
+        reader.read_exact(&mut header)?;
         if &header != b"root" {
             return Err(RootIoError::InvalidFormatError);
         }
@@ -101,7 +101,7 @@ impl<T: Read + Seek> RootFile<T> {
         read_u32!(reader, nbytes_info);
 
         let mut uuid = [0u8; 18];
-        reader.read(&mut uuid)?;
+        reader.read_exact(&mut uuid)?;
 
         let mut pointer = begin;
         let mut keys = vec![];
